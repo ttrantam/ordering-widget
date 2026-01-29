@@ -2,36 +2,45 @@ import {
   defineWidget,
   param,
   folder,
+  when,
   type ExtractParams,
   type ExtractAnswer,
 } from "@joymath/widget-sdk";
 
-// Widget definition - chỉ define schema
+// Widget definition
 export const widgetDefinition = defineWidget({
   // Parameters - config từ giáo viên
   parameters: {
-    question: param.string("Câu hỏi của bạn là gì?").label("Câu hỏi"),
+    question: param.string("Sắp xếp các số theo thứ tự").label("Câu hỏi"),
 
-    answers: folder("Đáp án", {
-      a: param.string("Đáp án A").label("A"),
-      b: param.string("Đáp án B").label("B"),
-      c: param.string("Đáp án C").label("C"),
-      d: param.string("Đáp án D").label("D"),
-      correct: param.select(["A", "B", "C", "D"], "A").label("Đáp án đúng"),
-    }),
+    numbers: param
+      .string("5, 2, 8, 1, 9, 3")
+      .label("Các số")
+      .description("Nhập các số cách nhau bởi dấu phẩy"),
+
+    orderType: param
+      .select(["Tăng dần", "Giảm dần"], "Tăng dần")
+      .label("Kiểu sắp xếp"),
 
     settings: folder("Cài đặt", {
-      showFeedback: param.boolean(true).label("Hiển thị giải thích"),
-      feedback: param
-        .string("Giải thích đáp án...")
-        .label("Giải thích")
-        .visibleIf({ param: "settings.showFeedback", equals: true }),
+      showFeedback: param.boolean(true).label("Hiển thị phản hồi"),
+      feedbackCorrect: param
+        .string("Tuyệt vời! Bé đã sắp xếp đúng rồi!")
+        .label("Phản hồi khi đúng")
+        .visibleIf(when("settings.showFeedback").equals(true)),
+      feedbackIncorrect: param
+        .string("Chưa đúng rồi, bé thử lại nhé!")
+        .label("Phản hồi khi sai")
+        .visibleIf(when("settings.showFeedback").equals(true)),
     }).expanded(false),
   },
 
-  // Answer schema - structure của câu trả lời
+  // Answer schema
   answer: {
-    selected: param.select(["A", "B", "C", "D"]),
+    sortedNumbers: param.string("[]").label("Thứ tự các số (JSON)"),
+    // Format: [5, 2, 8, 1, 9, 3] - thứ tự sau khi sắp xếp
+    initialOrder: param.string("[]").label("Thứ tự ban đầu (JSON)"),
+    // Format: [2, 0, 3, 1, 4, 5] - thứ tự xáo trộn ban đầu (indices)
   },
 } as const);
 
